@@ -40,7 +40,7 @@ To learn more, check out the [ADK Documentation](https://google.github.io/adk-do
 │   │   ├── data-science
 │   │   ├── financial-advisor
 │   │   ├── fomc-research
-│   │   ├── gemini-fullstack
+│   │   ├── deep-search
 │   │   ├── google-trends-agent
 │   │   ├── image-scoring
 │   │   ├── llm-auditor

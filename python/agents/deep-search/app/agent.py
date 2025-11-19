@@ -21,6 +21,7 @@ from typing import Literal
 from google.adk.agents import BaseAgent, LlmAgent, LoopAgent, SequentialAgent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.invocation_context import InvocationContext
+from google.adk.apps.app import App
 from google.adk.events import Event, EventActions
 from google.adk.planners import BuiltInPlanner
 from google.adk.tools import google_search
@@ -410,3 +411,4 @@ interactive_planner_agent = LlmAgent(
 )
 
 root_agent = interactive_planner_agent
+app = App(root_agent=root_agent, name="app")

@@ -1538,7 +1538,7 @@ agent-starter-pack create PROJECT_NAME [OPTIONS]
 *   `PROJECT_NAME`: Name for your new project directory and base for GCP resource naming (max 26 chars, converted to lowercase).
 
 **Template Selection:**
-*   `-a, --agent`: Agent template - built-in agents (e.g., `adk_base`, `agentic_rag`), remote templates (`adk@gemini-fullstack`, `github.com/user/repo@branch`), or local projects (`local@./path`).
+*   `-a, --agent`: Agent template - built-in agents (e.g., `adk_base`, `agentic_rag`), remote templates (`adk@deep-search`, `github.com/user/repo@branch`), or local projects (`local@./path`).
 
 **Deployment Options:**
 *   `-d, --deployment-target`: Target environment (`cloud_run` or `agent_engine`).

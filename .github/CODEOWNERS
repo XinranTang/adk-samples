@@ -22,8 +22,8 @@
 # FOMC Research
 /python/agents/fomc-research/ @mstyer-google
 
-# Gemini Fullstack
-/python/agents/gemini-fullstack/ @eliasecchig @lavinigam-gcp
+# Deep Search
+/python/agents/deep-search/ @eliasecchig @lavinigam-gcp
 
 # Image Scoring
 /python/agents/image-scoring/ @kishorerj

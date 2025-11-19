@@ -38,8 +38,8 @@ class ResearchConfiguration:
         max_search_iterations (int): Maximum search iterations allowed.
     """
 
-    critic_model: str = "gemini-2.5-pro"
-    worker_model: str = "gemini-2.5-flash"
+    critic_model: str = "gemini-3-pro-preview"
+    worker_model: str = "gemini-3-pro-preview"
     max_search_iterations: int = 5
 
 
