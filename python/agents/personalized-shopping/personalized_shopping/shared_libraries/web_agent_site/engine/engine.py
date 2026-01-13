@@ -14,13 +14,13 @@
 
 """ """
 
-from ast import literal_eval
-from collections import defaultdict
-from decimal import Decimal
 import json
 import os
 import random
 import re
+from ast import literal_eval
+from collections import defaultdict
+from decimal import Decimal
 
 from flask import render_template_string
 from pyserini.search.lucene import LuceneSearcher
@@ -179,7 +179,9 @@ def get_top_n_product_from_keywords(
         docs = [search_engine.doc(hit.docid) for hit in hits]
         top_n_asins = [json.loads(doc.raw())["id"] for doc in docs]
         top_n_products = [
-            product_item_dict[asin] for asin in top_n_asins if asin in product_item_dict
+            product_item_dict[asin]
+            for asin in top_n_asins
+            if asin in product_item_dict
         ]
     return top_n_products
 
@@ -334,7 +336,10 @@ def load_products(filepath, num_products=None, human_goals=True):
                 option_values = []
                 for option_content in option_contents:
                     option_value = (
-                        option_content["value"].strip().replace("/", " | ").lower()
+                        option_content["value"]
+                        .strip()
+                        .replace("/", " | ")
+                        .lower()
                     )
                     option_image = option_content.get("image", None)
 
@@ -364,7 +369,9 @@ def load_products(filepath, num_products=None, human_goals=True):
             if asin in human_attributes:
                 products[i]["instructions"] = human_attributes[asin]
         else:
-            products[i]["instruction_text"] = attributes[asin].get("instruction", None)
+            products[i]["instruction_text"] = attributes[asin].get(
+                "instruction", None
+            )
 
             products[i]["instruction_attributes"] = attributes[asin].get(
                 "instruction_attributes", None

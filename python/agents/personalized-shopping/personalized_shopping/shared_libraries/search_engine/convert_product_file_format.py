@@ -14,11 +14,12 @@
 
 import json
 import sys
+
 from tqdm import tqdm
 
 sys.path.insert(0, "../")
 
-from web_agent_site.engine.engine import load_products
+from web_agent_site.engine.engine import load_products  # noqa: E402
 
 all_products, *_ = load_products(filepath="../data/items_shuffle.json")
 

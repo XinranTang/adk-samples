@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .envs.web_agent_text_env import WebAgentTextEnv
+from .envs.web_agent_text_env import WebAgentTextEnv  # noqa: F401

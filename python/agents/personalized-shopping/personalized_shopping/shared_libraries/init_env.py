@@ -41,5 +41,7 @@ def get_webshop_env():
     if _webshop_env is None:
         _webshop_env = init_env(num_product_items)
         _webshop_env.reset()
-        print(f"Finished initializing WebshopEnv with {num_product_items} items.")
+        print(
+            f"Finished initializing WebshopEnv with {num_product_items} items."
+        )
     return _webshop_env

@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import defaultdict
 import json
 import random
 import string
 import time
+from collections import defaultdict
+
+import gym
+import numpy as np
+import torch
 from bs4 import BeautifulSoup
 from bs4.element import Comment
 from flask import Flask
-import gym
 from gym.envs.registration import register
-import numpy as np
-import torch
+
 from ..engine.engine import (
     ACTION_TO_TEMPLATE,
     BACK_TO_SEARCH,
@@ -44,7 +46,6 @@ from ..utils import (
     FEAT_IDS,
     random_idx,
 )
-
 
 app = Flask(__name__)
 
@@ -124,7 +125,11 @@ class WebAgentTextEnv(gym.Env):
         action_name, action_arg = parse_action(action)
         if action_arg is not None:
             action_arg = action_arg.lower()
-        if action_name == "search" and action_arg is not None and action_arg != "":
+        if (
+            action_name == "search"
+            and action_arg is not None
+            and action_arg != ""
+        ):
             status = self.browser.search(action_arg)
         elif (
             action_name == "click"
@@ -214,7 +219,9 @@ class WebAgentTextEnv(gym.Env):
         elif self.observation_mode == "url":
             return self.state["url"]
         else:
-            raise ValueError(f"Observation mode {self.observation_mode} not supported.")
+            raise ValueError(
+                f"Observation mode {self.observation_mode} not supported."
+            )
 
     @property
     def state(self):
@@ -246,13 +253,20 @@ class WebAgentTextEnv(gym.Env):
                     processed_t = f"[button] {t} [button_]"
                 elif t.parent.name == "label":  # options
                     if f'"{t}"' in self.state["url"]:
-                        processed_t = f"  [clicked button] {t} [clicked button_]"
+                        processed_t = (
+                            f"  [clicked button] {t} [clicked button_]"
+                        )
                         observation = f"You have clicked {t}.\n" + observation
                     else:
                         processed_t = f"  [button] {t} [button_]"
                 elif t.parent.get("class") == ["product-link"]:  # product asins
-                    if f"{t}" in self.server.user_sessions[self.session]["asins"]:
-                        processed_t = f"\n[clicked button] {t} [clicked button_]"
+                    if (
+                        f"{t}"
+                        in self.server.user_sessions[self.session]["asins"]
+                    ):
+                        processed_t = (
+                            f"\n[clicked button] {t} [clicked button_]"
+                        )
                     else:
                         processed_t = f"\n[button] {t} [button_]"
                 else:  # regular, unclickable text
@@ -273,7 +287,9 @@ class WebAgentTextEnv(gym.Env):
             self.session = self.session_prefix + self.session
 
         init_url = f"{self.base_url}/{self.session}"
-        self.browser.get(init_url, session_id=self.session, session_int=session_int)
+        self.browser.get(
+            init_url, session_id=self.session, session_int=session_int
+        )
 
         self.text_to_clickable = None
         self.instruction_text = (
@@ -295,7 +311,9 @@ class WebAgentTextEnv(gym.Env):
 
 def tag_visible(element):
     ignore = {"style", "script", "head", "title", "meta", "[document]"}
-    return element.parent.name not in ignore and not isinstance(element, Comment)
+    return element.parent.name not in ignore and not isinstance(
+        element, Comment
+    )
 
 
 class SimServer:
@@ -332,7 +350,9 @@ class SimServer:
             )
         )
         self.search_engine = init_search_engine(num_products=num_products)
-        self.goals = get_goals(self.all_products, self.product_prices, human_goals)
+        self.goals = get_goals(
+            self.all_products, self.product_prices, human_goals
+        )
         self.show_attrs = show_attrs
 
         # Fix outcome for random shuffling of goals
@@ -342,7 +362,9 @@ class SimServer:
         # Apply `filter_goals` parameter if exists to select speific goal(s)
         if filter_goals is not None:
             self.goals = [
-                goal for (i, goal) in enumerate(self.goals) if filter_goals(i, goal)
+                goal
+                for (i, goal) in enumerate(self.goals)
+                if filter_goals(i, goal)
             ]
 
         # Imposes `limit` on goals via random selection
@@ -561,7 +583,9 @@ class SimServer:
             if session_id not in self.user_sessions:
                 idx = (
                     session_int
-                    if (session_int is not None and isinstance(session_int, int))
+                    if (
+                        session_int is not None and isinstance(session_int, int)
+                    )
                     else random_idx(self.cum_weights)
                 )
                 goal = self.goals[idx]
@@ -679,7 +703,9 @@ class SimBrowser:
 
     def get(self, url, session_id=None, session_int=None):
         """Set browser variables to corresponding link, page HTML for URL"""
-        self.session_id = url.split("/")[-1] if session_id is None else session_id
+        self.session_id = (
+            url.split("/")[-1] if session_id is None else session_id
+        )
         self.page_source, _, _ = self.server.receive(
             self.session_id, self.current_url, session_int=session_int
         )

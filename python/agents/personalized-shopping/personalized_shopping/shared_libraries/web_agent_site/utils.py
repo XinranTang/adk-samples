@@ -15,8 +15,8 @@
 import bisect
 import hashlib
 import logging
-from os.path import abspath, dirname, join
 import random
+from os.path import abspath, dirname, join
 
 BASE_DIR = dirname(abspath(__file__))
 DEBUG_PROD_SIZE = None  # set to `None` to disable
@@ -49,7 +49,9 @@ def setup_logger(session_id, user_log_dir):
     """Creates a log file and logging object for the corresponding session ID"""
     logger = logging.getLogger(session_id)
     formatter = logging.Formatter("%(message)s")
-    file_handler = logging.FileHandler(user_log_dir / f"{session_id}.jsonl", mode="w")
+    file_handler = logging.FileHandler(
+        user_log_dir / f"{session_id}.jsonl", mode="w"
+    )
     file_handler.setFormatter(formatter)
     logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)
