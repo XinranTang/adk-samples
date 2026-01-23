@@ -5,7 +5,6 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from example_agent.agent import root_agent
 from fastapi import FastAPI, WebSocket
 from google.adk.agents import LiveRequestQueue
 from google.adk.agents.run_config import RunConfig
@@ -17,6 +16,8 @@ from google.genai.types import (
     Part,
 )
 from starlette.websockets import WebSocketDisconnect
+
+from example_agent.agent import root_agent
 
 load_dotenv()
 
@@ -85,7 +86,10 @@ async def agent_to_client_messaging(websocket: WebSocket, live_events):
             }
 
             if not event.content:
-                if message_to_send["turn_complete"] or message_to_send["interrupted"]:
+                if (
+                    message_to_send["turn_complete"]
+                    or message_to_send["interrupted"]
+                ):
                     await websocket.send_text(json.dumps(message_to_send))
                 continue
 
@@ -100,7 +104,9 @@ async def agent_to_client_messaging(websocket: WebSocket, live_events):
                         "is_final": not event.partial,
                     }
 
-            elif hasattr(event.content, "role") and event.content.role == "model":
+            elif (
+                hasattr(event.content, "role") and event.content.role == "model"
+            ):
                 if transcription_text:
                     message_to_send["output_transcription"] = {
                         "text": transcription_text,
@@ -111,11 +117,14 @@ async def agent_to_client_messaging(websocket: WebSocket, live_events):
                     )
 
                 for part in event.content.parts:
-                    if part.inline_data and part.inline_data.mime_type.startswith(
-                        "audio/pcm"
+                    if (
+                        part.inline_data
+                        and part.inline_data.mime_type.startswith("audio/pcm")
                     ):
                         audio_data = part.inline_data.data
-                        encoded_audio = base64.b64encode(audio_data).decode("ascii")
+                        encoded_audio = base64.b64encode(audio_data).decode(
+                            "ascii"
+                        )
                         message_to_send["parts"].append(
                             {"type": "audio/pcm", "data": encoded_audio}
                         )
@@ -137,7 +146,8 @@ async def agent_to_client_messaging(websocket: WebSocket, live_events):
                                 "type": "function_response",
                                 "data": {
                                     "name": part.function_response.name,
-                                    "response": part.function_response.response or {},
+                                    "response": part.function_response.response
+                                    or {},
                                 },
                             }
                         )
@@ -149,7 +159,6 @@ async def agent_to_client_messaging(websocket: WebSocket, live_events):
                 or message_to_send["input_transcription"]
                 or message_to_send["output_transcription"]
             ):
-
                 await websocket.send_text(json.dumps(message_to_send))
 
         except Exception as e:
@@ -168,7 +177,9 @@ async def client_to_agent_messaging(
 
             if mime_type == "text/plain":
                 data = message["data"]
-                content = Content(role="user", parts=[Part.from_text(text=data)])
+                content = Content(
+                    role="user", parts=[Part.from_text(text=data)]
+                )
                 live_request_queue.send_content(content=content)
 
             elif mime_type == "audio/pcm":
@@ -193,7 +204,9 @@ async def client_to_agent_messaging(
             break
 
         except Exception as e:
-            logging.error(f"An error occurred in client_to_agent_messaging: {e}")
+            logging.error(
+                f"An error occurred in client_to_agent_messaging: {e}"
+            )
 
 
 app = FastAPI()
