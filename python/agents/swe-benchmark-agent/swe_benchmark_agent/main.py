@@ -23,6 +23,7 @@ from datasets import load_dataset
 from swebench.harness import run_evaluation
 
 from .orchestrator import Orchestrator
+from .orchestrator_with_skills import OrchestratorWithSkills
 from .swebench_environment import SWEBenchEnvironment
 from .terminalbench_environment import TerminalBenchEnvironment
 
@@ -324,6 +325,7 @@ def process_instance(
     max_turns: int,
     model_name: str,
     benchmark_type: str = "swebench",
+    use_skills: bool = True,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Process a single benchmark instance.
 
@@ -352,7 +354,12 @@ def process_instance(
                 env = SWEBenchEnvironment(instance)
 
             with env:
-                orchestrator = Orchestrator(env, benchmark_type=benchmark_type)
+                if use_skills:
+                    orchestrator = OrchestratorWithSkills(
+                        env, benchmark_type=benchmark_type
+                    )
+                else:
+                    orchestrator = Orchestrator(env, benchmark_type=benchmark_type)
 
                 # Normal agent execution
                 patch, trajectory = asyncio.run(
@@ -459,6 +466,9 @@ def run(
     base_dir: str = typer.Option(
         ".", "--base-dir", help="Base directory for saving results."
     ),
+    use_skills: bool = typer.Option(
+        True, "--use-skills/--no-use-skills", help="Use skills orchestrator."
+    ),
 ) -> None:
     """Run benchmark instances and generate patches with robust progress tracking.
 
@@ -562,22 +572,18 @@ def run(
             )
             logger.info("Running the first %d instances", len(instances_to_run))
         except ValueError as exc:
-            instance = next(
-                (
+            instances_to_run = list(
                     i
                     for i in benchmark_dataset
-                    if i["instance_id"] == instance_id_or_count
-                ),
-                None,
+                    if i["instance_id"].startswith(instance_id_or_count)
             )
-            if instance is None:
+            if not instances_to_run:
                 logger.error(
-                    "Instance %s not found in the dataset",
+                    "No instances matched by %s in the dataset",
                     instance_id_or_count,
                 )
                 raise typer.Exit(code=1) from exc
-            instances_to_run.append(instance)
-            logger.info("Running single instance: %s", instance_id_or_count)
+            logger.info("Running %d instances", len(instances_to_run))
 
     # Load existing progress
     predictions_data, trajectories_data, existing_metadata = (
@@ -619,6 +625,7 @@ def run(
                 max_turns,
                 model_name,
                 benchmark_type,
+                use_skills,
             ): instance
             for instance in instances_to_run
         }
