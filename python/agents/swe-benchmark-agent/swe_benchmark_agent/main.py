@@ -326,6 +326,7 @@ def process_instance(
     model_name: str,
     benchmark_type: str = "swebench",
     use_skills: bool = True,
+    max_num_retries: int = 5,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Process a single benchmark instance.
 
@@ -346,7 +347,7 @@ def process_instance(
 
     try:
         # Use context manager for automatic cleanup
-        for i in range(5):
+        for i in range(max_num_retries):
             # Use appropriate environment class
             if benchmark_type == "terminalbench":
                 env = TerminalBenchEnvironment(instance)
@@ -368,8 +369,9 @@ def process_instance(
 
                 if patch and patch.strip():
                     break
-                logger.info("Empty patch, retrying... (%d/3)", i + 1)
-                time.sleep(60)
+                if i < max_num_retries - 1:
+                    logger.info("Empty patch, retrying... (%d/%d)", i + 1, max_num_retries)
+                    time.sleep(60)
 
         elapsed_time = time.time() - start_time
         logger.info("Completed %s in %.2fs", instance_id, elapsed_time)
@@ -426,9 +428,9 @@ def run(
             " run."
         ),
     ),
-    repo: str = typer.Option(
+    repo: list[str] = typer.Option(
         None,
-        help="The repository to run instances for. Overrides instance_id_or_count.",
+        help="The repository(s) to run instances for. Overrides instance_id_or_count.",
     ),
     model_name: str = typer.Option(
         "gemini-2.5-flash", help="The name of the model to use."
@@ -473,6 +475,9 @@ def run(
     use_skills: bool = typer.Option(
         True, "--use-skills/--no-use-skills", help="Use skills orchestrator."
     ),
+    max_num_retries: int = typer.Option(
+        5, "--max-retries", help="Maximum number of retries for empty patches."
+    ),
 ) -> None:
     """Run benchmark instances and generate patches with robust progress tracking.
 
@@ -490,6 +495,8 @@ def run(
       save_frequency: Save progress every N completed instances.
       run_id: Run ID for organizing results. Auto-generated if not provided.
       base_dir: Base directory for saving results.
+      use_skills: Use skills orchestrator.
+      max_num_retries: Maximum number of retries for empty patches.
     """
     start_time = time.time()
 
@@ -570,7 +577,7 @@ def run(
         logger.info("Running FULL dataset (%d instances)", total_instances)
     elif repo:
         instances_to_run = [
-            i for i in benchmark_dataset if i["repo"] == repo
+            i for i in benchmark_dataset if i["repo"] in repo
         ]
         if not instances_to_run:
             logger.error(
@@ -641,6 +648,7 @@ def run(
                 model_name,
                 benchmark_type,
                 use_skills,
+                max_num_retries,
             ): instance
             for instance in instances_to_run
         }
