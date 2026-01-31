@@ -23,7 +23,7 @@ dependencies = [
     "jinja2>=3.1.5",
     "GitPython>=3.1.45",
     "docker>=7.1.0",
-    "google-adk @ file:///usr/local/google/home/txinran/evals/swe/adk-python",
+    "google-adk @ file:///usr/local/google/home/txinran/eval/swe/adk-python",
     "pyyaml>=6.0.2",
     "python-dotenv>=1.0.1",
     "google-genai>=1.56.0",

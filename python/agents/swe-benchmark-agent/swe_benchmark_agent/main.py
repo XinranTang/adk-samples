@@ -426,6 +426,10 @@ def run(
             " run."
         ),
     ),
+    repo: str = typer.Option(
+        None,
+        help="The repository to run instances for. Overrides instance_id_or_count.",
+    ),
     model_name: str = typer.Option(
         "gemini-2.5-flash", help="The name of the model to use."
     ),
@@ -564,6 +568,17 @@ def run(
     elif full_dataset:
         instances_to_run = list(benchmark_dataset)
         logger.info("Running FULL dataset (%d instances)", total_instances)
+    elif repo:
+        instances_to_run = [
+            i for i in benchmark_dataset if i["repo"] == repo
+        ]
+        if not instances_to_run:
+            logger.error(
+                "No instances matched by repo '%s' in the dataset",
+                repo,
+            )
+            raise typer.Exit(code=1)
+        logger.info("Running %d instances for repo %s", len(instances_to_run), repo)
     else:
         try:
             n = int(instance_id_or_count)
